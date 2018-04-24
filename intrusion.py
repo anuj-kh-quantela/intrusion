@@ -3,53 +3,18 @@ import numpy as np
 import cv2,imutils,os,sys
 from imutils.object_detection import non_max_suppression
 import configparser,datetime
+import json
 
-
-class intrusion (object):
+class intrusion(object):
     
     # def __init__(self,video_channel,city_name='vijaywada',ROI=None,log_path=None,config_path=None,output_path=None):
     def __init__(self, video_path, city_name, location_name = " ", ROI=None):
-    	self.video_channel = video_path
-
-    #     self.__project_name = "intrusion"
-    #     self.__city_name = city_name
-    #     self.video_channel = video_channel
-    #     self.start_time = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M")
-        self.__ROI = ROI 
+    	
+        self.__video_name = os.path.splitext(os.path.basename(video_path))[0]
         
-    #     if log_path is None:
-    #         self.makedirs_1("../"+self.__city_name+"/"+self.__project_name+"/log_files/",exist_ok=True)
-    #         self.log_path = "../"+self.__city_name+"/"+self.__project_name+"/log_files/"
-
+        self.video_channel = video_path
+        self.__ROI = ROI 
             
-    #     if output_path is None:
-    #         self.makedirs_1("../"+self.__city_name+"/"+self.__project_name+"/output_path/",exist_ok=True)
-    #         self.makedirs_1("../"+self.__city_name+"/"+self.__project_name+"/output_path/flat_files/",exist_ok=True)
-    #         self.makedirs_1("../"+self.__city_name+"/"+self.__project_name+"/output_path/visual_files/",exist_ok=True)
-    #         self.output_path = "../"+self.__city_name+"/"+self.__project_name+"/output_path/"
-            
-    #     if config_path is None:
-    #         self.makedirs_1("../"+self.__city_name+"/"+self.__project_name+"/config_path/",exist_ok=True)
-    #         self.config_path = "../"+self.__city_name+"/"+self.__project_name+"/config_path/"
-    #         self.write_config()
-
-                
-            
-    # def write_config(self):
-    #     config = configparser.ConfigParser()
-    #     config.optionxform = str
-    #     config[self.__project_name +"_"+self.__city_name] = {}
-    #     config[self.__project_name +"_"+self.__city_name]['video_channel'] = self.video_channel
-    #     config[self.__project_name +"_"+self.__city_name]['log_path'] = self.log_path
-    #     config[self.__project_name +"_"+self.__city_name]['config_path'] = self.config_path
-    #     config[self.__project_name +"_"+self.__city_name]['output_path'] = self.output_path
-    #     config[self.__project_name +"_"+self.__city_name]['ROI'] = str(self.__ROI)
-    #     #writing config file
-    #     with open(self.config_path+self.__project_name+".ini", 'w') as configfile:
-    #         config.write(configfile)
-
-        # 1. Define complete directory structure
-        # clean city name given by user
         self.__city_name = city_name.strip().lower().replace(" ", "_")
         # clean location name given by user
         self.__location_name = location_name.strip().lower().replace(" ", "_")
@@ -71,6 +36,34 @@ class intrusion (object):
                 os.makedirs(dir_structure)
 
 
+        # THIS IS NEW
+        json_file_path = predef_dir_structure_path
+
+        SensorMetaInfo = {
+            'CameraID' : self.__video_name,
+            'ServerId' : 'vijaywada_PC_01',
+            'Product_category_id' : 1,
+            'Feature_id' : 1,
+            'Lx' : '10.233N',
+            'Ly' :  '70.1212S'
+
+        }
+
+        sensor_meta_info_json_file_name = 'SensorMetaInfo.json'
+        with open(os.path.join(json_file_path, sensor_meta_info_json_file_name), 'w') as f:
+            json.dump(SensorMetaInfo, f)
+
+        Event = {
+        'Alert_id' : 1,
+        'TypeDescription' : 'Somebody enter the virtual fencing'
+        }
+
+        event_json_file_name = 'event.json'
+        with open(os.path.join(json_file_path, event_json_file_name), 'w') as f:
+            json.dump(Event, f)
+
+
+
         self.__user_output_path = os.path.join(predef_dir_structure_path, 'output')
         self.__path_to_output = self.__user_output_path
         self.__log_path = os.path.join(predef_dir_structure_path, 'log')
@@ -79,6 +72,8 @@ class intrusion (object):
         # create output directory if doesn't exists already
         if not os.path.exists(self.__path_to_output):
             os.makedirs(self.__path_to_output)
+        
+
 
         print("Done Init!")
 
@@ -105,7 +100,8 @@ class intrusion (object):
             return False,() # or (0,0,0,0) ?
         return True,(x, y, w, h)
 
-    def detect_intrusion(self,plot=False):
+    def detect_intrusion(self, plot=False):
+        
         """
         plot: To show intermediate images
         """
@@ -134,6 +130,7 @@ class intrusion (object):
         out = None
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
         countdown_time = 0
+        roi_created_flag = False
         while True:
             current_time = datetime.datetime.now()
             try:
@@ -153,8 +150,10 @@ class intrusion (object):
                     print("Selected ROI Coordinates: " + str(bbox1))
                     
                     self.__ROI = bbox1
+                    roi_created_flag = True
                     # self.write_config()
-                log_file.write(str(datetime.datetime.now())+"--> ROI created "+str(bbox1)+"\n")
+
+                    log_file.write(str(datetime.datetime.now())+"--> ROI created "+str(bbox1)+"\n")
 
 
                 # detect people in the image
@@ -185,6 +184,7 @@ class intrusion (object):
                     if ((intrusion_started_time is None) and (countdown_time==0)):
                         #print('creating video instance')
                         intrusion_started_time = datetime.datetime.now()
+                        video_file_name = visual_output_path+intrusion_started_time.strftime("%Y_%m_%d_%H_%M_%S")+".avi"
                         out = cv2.VideoWriter(visual_output_path+intrusion_started_time.strftime("%Y_%m_%d_%H_%M_%S")+".avi",fourcc, 20.0, (image.shape[1],image.shape[0]))
                     countdown_time = 45  # extra time fow which video is going to be written
 
@@ -194,8 +194,17 @@ class intrusion (object):
                     num_humans = sum(res)
                     out.write(image)
                     cv2.putText(image,"number of humans= "+str(num_humans),(40,40), cv2.FONT_HERSHEY_PLAIN, 1,(0,255,0),1,cv2.LINE_AA)
-                    #writing log file
-                    log_file.write(str(intrusion_started_time)+"-->"+str(num_humans)+" humans detected within ROI\n")
+                    # writing log file
+                    data = {
+
+
+                        'ReportedTime' : datetime.datetime.now(),
+                        'CapturedTime' : intrusion_started_time
+                        # 'VideoURL(FilePath)' : visual_output_path+intrusion_started_time.strftime("%Y_%m_%d_%H_%M_%S")+".avi" 
+                    }
+
+                    # log_file.write(str(datetime.datetime.now())+"-->"+str(num_humans)+" humans detected within ROI\n")
+                    log_file.write('Number of humans within ROI: ' + str(num_humans) +', detected at time: ' + str(datetime.datetime.now()) + ', '+video_file_name  + ', ROI: ' + str(pick) +'\n')
                 else :
                     intrustion_stopped = True
                     intrusion_started_time = None
@@ -221,10 +230,3 @@ class intrusion (object):
             
 
             
-        
-        
-            
-        
-# intr = intrusion('rtsp://192.168.20.9/6d801f1f-a9aa-449a-85d3-88608e5ee67b/6d801f1f-a9aa-449a-85d3-88608e5ee67b_vs1?token=6d801f1f-a9aa-449a-85d3-88608e5ee67b^LVERAMOTD^50^26^26^1657790795^d660cf85eebea453b0c933b63025aedeb9c22fea&username=admin',ROI=(228, 57, 149, 154))
-intr = intrusion('test_video_1.mp4', 'bangalore', "indranagar/society-1")
-intr.detect_intrusion(plot=True)
