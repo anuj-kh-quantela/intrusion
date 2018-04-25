@@ -113,7 +113,7 @@ class intrusion(object):
         if not os.path.exists(visual_output_path):
             os.makedirs(visual_output_path)
 
-        log_file =open(self.__log_path+ "/" +self.start_time+".txt", "a+")
+        log_file = open(self.__log_path+ "/" +self.start_time+".txt", "a+")
         
         log_file.write(self.start_time+"-->Starting Intrusion detection at time\n")
         cap = cv2.VideoCapture(self.video_channel)
@@ -131,7 +131,10 @@ class intrusion(object):
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
         countdown_time = 0
         roi_created_flag = False
+        log_file.close()
         while True:
+            log_file = open(self.__log_path+ "/" +self.start_time+".txt", "a+")
+
             current_time = datetime.datetime.now()
             try:
                 ret,frame = cap.read()
@@ -228,5 +231,10 @@ class intrusion(object):
                 print(e,exc_type, fname, exc_tb.tb_lineno)
                 log_file.write(str(datetime.datetime.now())+"--> Exception"+str(e)+str(exc_type)+" "+str(fname)+" "+ str(exc_tb.tb_lineno))
             
+            print("ENDING HERE")
+            log_file.close()
 
             
+
+intr = intrusion('test_video_1.mp4', 'kanpur')
+intr.detect_intrusion(plot=True)
