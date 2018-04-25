@@ -231,7 +231,7 @@ class intrusion(object):
                 print(e,exc_type, fname, exc_tb.tb_lineno)
                 log_file.write(str(datetime.datetime.now())+"--> Exception"+str(e)+str(exc_type)+" "+str(fname)+" "+ str(exc_tb.tb_lineno))
             
-            print("ENDING HERE")
+            # print("ENDING HERE")
             log_file.close()
 
             
