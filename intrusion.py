@@ -265,7 +265,7 @@ class intrusion(object):
 
 						"CapturedTime": str(datetime.datetime.now()), "VideoURL": "http://<ip-address>"+str(video_file_name) } } }, "configName": "IntrusionDetection", "groupName": "VideoAnalytics" }
 
-					subprocess.call(["curl", "-X", "POST", "http://52.74.189.153:9090/api/v1/source/getInputData", "-H", "Cache-Control: no-cache", "-H", "Content-Type: application/json", "-H", "Postman-Token: 8a74ff29-c6cd-48ef-ad48-78a85c66ff94", "-H", "x-access-token: MW7VN68RJAFJ0K5XPRZPKOPN02RDK9JR", "-d", json.dumps(cdata)])
+					# subprocess.call(["curl", "-X", "POST", "http://52.74.189.153:9090/api/v1/source/getInputData", "-H", "Cache-Control: no-cache", "-H", "Content-Type: application/json", "-H", "Postman-Token: 8a74ff29-c6cd-48ef-ad48-78a85c66ff94", "-H", "x-access-token: MW7VN68RJAFJ0K5XPRZPKOPN02RDK9JR", "-d", json.dumps(cdata)])
 
 
 
@@ -286,9 +286,9 @@ class intrusion(object):
 							# subprocess.call(['curl -X POST   http://52.74.189.153:9090/api/v1/source/getInputData', '-H', 'Cache-Control: no-cache', '-H', 'Content-Type: application/json', '-H', 'Postman-Token: 8a74ff29-c6cd-48ef-ad48-78a85c66ff94', '-H', 'x-access-token: MW7VN68RJAFJ0K5XPRZPKOPN02RDK9JR', '-d', '{ "input": { "data": { "SensorMetaInfo": {"CameraID": "test_video_1", "Feature_id": 1, "Product_category_id": 1, "ServerId": "vijaywada_PC_01", "Lx": "10.233N", "Ly": "70.1212S", "CameraDescription": "cisco_cam_type_1", "LongDescription": "low range camera"}, "Event": { "EventID": 1, "EventDescription": "Somebody enter the virtual fencing" }, "ROI_drawn": { "Point1": { "X": "10", "Y": "132" }, "Point2": { "X": "26", "Y": "132" }, "Point3": { "X": "26", "Y": "148" }, "Point4": { "X": "10", "Y": "148" } }, "Data": { "number_of_humans": 2, "detected_roi": { "Point1": { "X": "112", "Y": "312" }, "Point2": { "X": "34", "Y": "356" } }, "CapturedTime": "2018-02-26T10:23:51", "VideoURL": "http://<ip-address>/<path-to-output>/bangalore/indranagar/society-2/intrusion/output visual_files/2018_04_23_18_01/2018_04_23_18_01_11.avi" } } }, "configName": "IntrusionDetection", "groupName": "VideoAnalytics" }'], shell=True)
 							# subprocess.call(["curl", "-X", "POST", "http://52.74.189.153:9090/api/v1/source/getInputData", "-H", "Cache-Control: no-cache", "-H", "Content-Type: application/json", "-H", "Postman-Token: 8a74ff29-c6cd-48ef-ad48-78a85c66ff94", "-H", "x-access-token: MW7VN68RJAFJ0K5XPRZPKOPN02RDK9JR", "-d", '{ "input": { "data": { "SensorMetaInfo": {"CameraID": "test_video_1", "Feature_id": 1, "Product_category_id": 1, "ServerId": "vijaywada_PC_01", "Lx": "10.233N", "Ly": "70.1212S", "CameraDescription": "cisco_cam_type_1", "LongDescription": "low range camera"}, "Event": { "EventID": 1, "EventDescription": "Somebody enter the virtual fencing" }, "ROI_drawn": { "Point1": { "X": "10", "Y": "132" }, "Point2": { "X": "26", "Y": "132" }, "Point3": { "X": "26", "Y": "148" }, "Point4": { "X": "10", "Y": "148" } }, "Data": { "number_of_humans": 2, "detected_roi": { "Point1": { "X": "112", "Y": "312" }, "Point2": { "X": "34", "Y": "356" } }, "CapturedTime": "2018-02-26T10:23:51", "VideoURL": "http://<ip-address>/<path-to-output>/bangalore/indranagar/society-2/intrusion/output visual_files/2018_04_23_18_01/2018_04_23_18_01_11.avi" } } }, "configName": "IntrusionDetection", "groupName": "VideoAnalytics" }'])
 							
-							# subprocess.call(["curl", "-X", "POST", "http://52.74.189.153:9090/api/v1/source/getInputData", "-H", "Cache-Control: no-cache", "-H", "Content-Type: application/json", "-H", "Postman-Token: 8a74ff29-c6cd-48ef-ad48-78a85c66ff94", "-H", "x-access-token: MW7VN68RJAFJ0K5XPRZPKOPN02RDK9JR", "-d", json.dumps(cdata)])
-							
-							out.release()
+							subprocess.call(["curl", "-X", "POST", "http://52.74.189.153:9090/api/v1/source/getInputData", "-H", "Cache-Control: no-cache", "-H", "Content-Type: application/json", "-H", "Postman-Token: 8a74ff29-c6cd-48ef-ad48-78a85c66ff94", "-H", "x-access-token: MW7VN68RJAFJ0K5XPRZPKOPN02RDK9JR", "-d", json.dumps(cdata)])
+							print cdata
+							out.release()	
 							out = None
 
 				# draw the final bounding boxes
