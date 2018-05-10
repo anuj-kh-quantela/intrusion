@@ -5,7 +5,7 @@ from imutils.object_detection import non_max_suppression
 import configparser,datetime
 import json
 import subprocess
-
+import datetime as dt
 class intrusion(object):
 	
 	def __init__(self, video_path, city_name, location_name = " ", ROI=None):
@@ -134,7 +134,8 @@ class intrusion(object):
 		log_file.close()
 		
 		
-
+		intrusion_check = None
+		event_identifier = 1
 		while True:
 
 			
@@ -210,6 +211,8 @@ class intrusion(object):
 						# print video_file_name
 						# out = cv2.VideoWriter(visual_output_path+intrusion_started_time.strftime("%Y_%m_%d_%H_%M_%S")+".avi",fourcc, 20.0, (image.shape[1],image.shape[0]))
 						out = cv2.VideoWriter(video_file_name, fourcc, 15.0, (image.shape[1],image.shape[0]))
+						# print("\n ====== came here 01")
+						intrusion_check = True
 					countdown_time = 45  # extra time fow which video is going to be written
 
 					## Do all shit here...event happened...
@@ -259,15 +262,28 @@ class intrusion(object):
 
 					# print "detected_roi: " + str(detected_roi)
 
-					cdata = { "input": { "data": { "SensorMetaInfo": {"CameraID": "test_video_1", "Feature_id": 1, "Product_category_id": 1, "ServerId": "vijaywada_PC_01", "Lx": "10.233N", "Ly": "70.1212S", "CameraDescription": "cisco_cam_type_1", "LongDescription": "low range camera"}, "Event": { "EventID": 1, "EventDescription": "Somebody enter the virtual fencing" }, "ROI_drawn": { "Point1": { "X": str(bbox1[0]), "Y": str(bbox1[1]) }, "Point2": { "X": str(bbox1[0]+bbox1[2]), "Y": str(bbox1[1]) }, "Point3": { "X": str(bbox1[0]), "Y": str(bbox1[1]+bbox1[3]) }, "Point4": { "X": str(bbox1[0]+bbox1[2]), "Y": str(bbox1[1]+bbox1[3]) } }, "Data": { "number_of_humans": str(num_humans), 
+					# cdata = { "input": { "data": { "SensorMetaInfo": {"CameraID": "test_video_1", "Feature_id": 1, "Product_category_id": 1, "ServerId": "vijaywada_PC_01", "Lx": "10.233N", "Ly": "70.1212S", "CameraDescription": "cisco_cam_type_1", "LongDescription": "low range camera"}, "Event": { "EventID": 1, "EventDescription": "Somebody enter the virtual fencing" }, "ROI_drawn": { "Point1": { "X": str(bbox1[0]), "Y": str(bbox1[1]) }, "Point2": { "X": str(bbox1[0]+bbox1[2]), "Y": str(bbox1[1]) }, "Point3": { "X": str(bbox1[0]), "Y": str(bbox1[1]+bbox1[3]) }, "Point4": { "X": str(bbox1[0]+bbox1[2]), "Y": str(bbox1[1]+bbox1[3]) } }, "Data": { "number_of_humans": str(num_humans), 
 
-					"detected_roi": detected_roi,
+					# "detected_roi": detected_roi,
 
-						"CapturedTime": str(datetime.datetime.now()), "VideoURL": "http://<ip-address>"+str(video_file_name) } } }, "configName": "IntrusionDetection", "groupName": "VideoAnalytics" }
+					# 	"CapturedTime": str(datetime.datetime.now()), "VideoURL": "http://<ip-address>"+str(video_file_name) } } }, "configName": "IntrusionDetection", "groupName": "VideoAnalytics" }
+
 
 					# subprocess.call(["curl", "-X", "POST", "http://52.74.189.153:9090/api/v1/source/getInputData", "-H", "Cache-Control: no-cache", "-H", "Content-Type: application/json", "-H", "Postman-Token: 8a74ff29-c6cd-48ef-ad48-78a85c66ff94", "-H", "x-access-token: MW7VN68RJAFJ0K5XPRZPKOPN02RDK9JR", "-d", json.dumps(cdata)])
 
+					cdata = { "input": { "data": { "SensorMetaInfo": {"CameraID": "test_video_1", "Feature_id": 1, "Product_category_id": 1, "ServerId": "vijaywada_PC_01", "Lx": "10.233N", "Ly": "70.1212S", "CameraDescription": "cisco_cam_type_1", "LongDescription": "low range camera"}, "Event": { "EventIdentifier": event_identifier, "EventID": 1, "EventDescription": "Somebody enter the virtual fencing" }, "ROI_drawn": { "Point1": { "X": str(bbox1[0]), "Y": str(bbox1[1]) }, "Point2": { "X": str(bbox1[0]+bbox1[2]), "Y": str(bbox1[1]) }, "Point3": { "X": str(bbox1[0]), "Y": str(bbox1[1]+bbox1[3]) }, "Point4": { "X": str(bbox1[0]+bbox1[2]), "Y": str(bbox1[1]+bbox1[3]) } }, "Data": { "number_of_humans": str(num_humans), 
 
+					"detected_roi": human_list,
+
+						"CapturedTime": str(datetime.datetime.now()), "VideoURL": "http://<ip-address>"+str(video_file_name) } } }, "configName": "IntrusionDetection", "groupName": "VideoAnalytics" }
+
+					if intrusion_check:
+						# print cdata
+						# print("\n==== START POINT -----")
+						subprocess.call(["curl", "-X", "POST", "http://52.74.189.153:9090/api/v1/source/getInputData", "-H", "Cache-Control: no-cache", "-H", "Content-Type: application/json", "-H", "Postman-Token: 8a74ff29-c6cd-48ef-ad48-78a85c66ff94", "-H", "x-access-token: MW7VN68RJAFJ0K5XPRZPKOPN02RDK9JR", "-d", json.dumps(cdata)])
+						# print("\n")
+
+					intrusion_check = False
 
 					# with open("ads.json" 'w') as f:
 						# json.dumps(cdata, f)
@@ -275,7 +291,7 @@ class intrusion(object):
 					# log_file.write(str(datetime.datetime.now())+"-->"+str(num_humans)+" humans detected within ROI\n")
 					log_file.write('Number of humans within ROI: ' + str(num_humans) +', detected at time: ' + str(datetime.datetime.now()) + ', '+video_file_name  + ', ROI: ' + str(pick) +'\n')
 				else :
-					
+					# print("CAME TO STOP")
 					intrustion_stopped = True
 					intrusion_started_time = None
 					if out is not None:
@@ -286,8 +302,10 @@ class intrusion(object):
 							# subprocess.call(['curl -X POST   http://52.74.189.153:9090/api/v1/source/getInputData', '-H', 'Cache-Control: no-cache', '-H', 'Content-Type: application/json', '-H', 'Postman-Token: 8a74ff29-c6cd-48ef-ad48-78a85c66ff94', '-H', 'x-access-token: MW7VN68RJAFJ0K5XPRZPKOPN02RDK9JR', '-d', '{ "input": { "data": { "SensorMetaInfo": {"CameraID": "test_video_1", "Feature_id": 1, "Product_category_id": 1, "ServerId": "vijaywada_PC_01", "Lx": "10.233N", "Ly": "70.1212S", "CameraDescription": "cisco_cam_type_1", "LongDescription": "low range camera"}, "Event": { "EventID": 1, "EventDescription": "Somebody enter the virtual fencing" }, "ROI_drawn": { "Point1": { "X": "10", "Y": "132" }, "Point2": { "X": "26", "Y": "132" }, "Point3": { "X": "26", "Y": "148" }, "Point4": { "X": "10", "Y": "148" } }, "Data": { "number_of_humans": 2, "detected_roi": { "Point1": { "X": "112", "Y": "312" }, "Point2": { "X": "34", "Y": "356" } }, "CapturedTime": "2018-02-26T10:23:51", "VideoURL": "http://<ip-address>/<path-to-output>/bangalore/indranagar/society-2/intrusion/output visual_files/2018_04_23_18_01/2018_04_23_18_01_11.avi" } } }, "configName": "IntrusionDetection", "groupName": "VideoAnalytics" }'], shell=True)
 							# subprocess.call(["curl", "-X", "POST", "http://52.74.189.153:9090/api/v1/source/getInputData", "-H", "Cache-Control: no-cache", "-H", "Content-Type: application/json", "-H", "Postman-Token: 8a74ff29-c6cd-48ef-ad48-78a85c66ff94", "-H", "x-access-token: MW7VN68RJAFJ0K5XPRZPKOPN02RDK9JR", "-d", '{ "input": { "data": { "SensorMetaInfo": {"CameraID": "test_video_1", "Feature_id": 1, "Product_category_id": 1, "ServerId": "vijaywada_PC_01", "Lx": "10.233N", "Ly": "70.1212S", "CameraDescription": "cisco_cam_type_1", "LongDescription": "low range camera"}, "Event": { "EventID": 1, "EventDescription": "Somebody enter the virtual fencing" }, "ROI_drawn": { "Point1": { "X": "10", "Y": "132" }, "Point2": { "X": "26", "Y": "132" }, "Point3": { "X": "26", "Y": "148" }, "Point4": { "X": "10", "Y": "148" } }, "Data": { "number_of_humans": 2, "detected_roi": { "Point1": { "X": "112", "Y": "312" }, "Point2": { "X": "34", "Y": "356" } }, "CapturedTime": "2018-02-26T10:23:51", "VideoURL": "http://<ip-address>/<path-to-output>/bangalore/indranagar/society-2/intrusion/output visual_files/2018_04_23_18_01/2018_04_23_18_01_11.avi" } } }, "configName": "IntrusionDetection", "groupName": "VideoAnalytics" }'])
 							
+							# print("\n===== END POINT =====")
 							subprocess.call(["curl", "-X", "POST", "http://52.74.189.153:9090/api/v1/source/getInputData", "-H", "Cache-Control: no-cache", "-H", "Content-Type: application/json", "-H", "Postman-Token: 8a74ff29-c6cd-48ef-ad48-78a85c66ff94", "-H", "x-access-token: MW7VN68RJAFJ0K5XPRZPKOPN02RDK9JR", "-d", json.dumps(cdata)])
-							print cdata
+							event_identifier += 1
+							# print("\n")
 							out.release()	
 							out = None
 
@@ -310,5 +328,5 @@ class intrusion(object):
 
 			detected_roi = {}
 
-# intr = intrusion('test_video_1.mp4', 'kanpur')
-# intr.detect_intrusion(plot=True)
+intr = intrusion('test_video_1.mp4', 'kanpur')
+intr.detect_intrusion(plot=True)
