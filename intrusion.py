@@ -328,5 +328,5 @@ class intrusion(object):
 
 			detected_roi = {}
 
-intr = intrusion('test_video_1.mp4', 'kanpur')
-intr.detect_intrusion(plot=True)
+# intr = intrusion('test_video_1.mp4', 'kanpur')
+# intr.detect_intrusion(plot=True)
